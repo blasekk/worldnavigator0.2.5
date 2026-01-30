@@ -3,17 +3,9 @@
 import { doc, setDoc, updateDoc, getDoc } from 'firebase/firestore';
 import { getApp } from 'firebase/app';
 import { getSdks, setDocumentNonBlocking, updateDocumentNonBlocking } from '@/firebase';
+import type { UserProfile } from '@/lib/types';
 
 const getDb = () => getSdks(getApp()).firestore;
-
-export interface UserProfile {
-  id: string;
-  username: string;
-  avatarId: string;
-  avatarUrl: string;
-  bestClassicScore?: number;
-  bestWorldQuizScore?: number;
-}
 
 export async function createUserProfile(uid: string, username: string, avatarId: string, avatarUrl: string): Promise<void> {
   const userProfileRef = doc(getDb(), 'users', uid);
