@@ -12,7 +12,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ArrowLeft, Loader2, Copy } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Label } from '@/components/ui/label';
-import type { GameLobby } from '@/firebase/multiplayer';
+import type { GameLobby } from '@/lib/types';
 import { Separator } from '@/components/ui/separator';
 import { Checkbox } from '@/components/ui/checkbox';
 import type { QuestionType } from '@/lib/challenge-logic';
@@ -32,7 +32,7 @@ export function LobbyScreen() {
 
   useEffect(() => {
     if (lobby?.status === 'playing') {
-      setView('game');
+      setView(lobby.gameMode === 'classic' ? 'game' : 'challenge');
     }
   }, [lobby, setView]);
 
