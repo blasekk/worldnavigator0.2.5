@@ -1,0 +1,268 @@
+{
+  "entities": {
+    "UserProfile": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "UserProfile",
+      "type": "object",
+      "description": "Represents a user's profile, storing their username, avatar, and best scores in different game modes.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the user profile, matching the Firebase Auth UID."
+        },
+        "username": {
+          "type": "string",
+          "description": "The username chosen by the player."
+        },
+        "avatarId": {
+          "type": "string",
+          "description": "The ID of the selected avatar from the /avatars collection."
+        },
+        "bestClassicScore": {
+          "type": "number",
+          "description": "The user's best score in the classic game mode (lower is better)."
+        },
+        "bestWorldQuizScore": {
+          "type": "number",
+          "description": "The user's best score in the world quiz game mode (higher is better)."
+        }
+      },
+      "required": [
+        "id",
+        "username",
+        "avatarId"
+      ]
+    },
+    "Avatar": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Avatar",
+      "type": "object",
+      "description": "Represents an avatar that a user can select for their profile.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the avatar."
+        },
+        "imageUrl": {
+          "type": "string",
+          "description": "URL of the image representing the avatar.",
+          "format": "uri"
+        }
+      },
+      "required": [
+        "id",
+        "imageUrl"
+      ]
+    },
+    "GameLobby": {
+      "title": "GameLobby",
+      "type": "object",
+      "description": "Represents a multiplayer game lobby where players can gather before starting a match.",
+      "properties": {
+        "hostId": {
+          "type": "string",
+          "description": "The Firebase Auth UID of the user who created the lobby."
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "waiting",
+            "playing",
+            "finished"
+          ],
+          "description": "The current status of the lobby."
+        },
+        "gameMode": {
+          "type": "string",
+          "enum": [
+            "classic",
+            "challenge"
+          ],
+          "description": "The game mode for the lobby."
+        },
+        "players": {
+          "type": "array",
+          "description": "An array of player objects currently in the lobby.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "uid": {
+                "type": "string",
+                "description": "The player's Firebase Auth UID."
+              },
+              "username": {
+                "type": "string",
+                "description": "The player's display name."
+              },
+              "avatarUrl": {
+                "type": "string",
+                "description": "The URL of the player's avatar."
+              }
+            },
+            "required": [
+              "uid",
+              "username"
+            ]
+          }
+        },
+        "targetCountryId": {
+          "type": "string",
+          "description": "The ID of the country to be guessed in the game (for classic mode)."
+        },
+        "createdAt": {
+          "type": "object",
+          "description": "The server-side timestamp of when the lobby was created."
+        },
+        "currentPlayerUid": {
+          "type": "string",
+          "description": "The UID of the player whose turn it is."
+        },
+        "winnerUid": {
+          "type": "string",
+          "description": "The UID of the player who won the game."
+        },
+        "guesses": {
+          "type": "array",
+          "description": "An array of guess objects made by players in the lobby.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "playerId": {
+                "type": "string"
+              },
+              "guessedCountryId": {
+                "type": "string"
+              },
+              "guessedCountryName": {
+                "type": "string"
+              },
+              "continentMatch": {
+                "type": "boolean"
+              },
+              "hemisphereMatch": {
+                "type": "boolean"
+              },
+              "tempComparison": {
+                "type": "string"
+              },
+              "elevComparison": {
+                "type": "string"
+              },
+              "direction": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "challengeQuestionTypes": {
+          "type": "array",
+          "description": "The selected question types for the challenge mode lobby.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "challengeQuestions": {
+          "type": "array",
+          "description": "An array of questions for the challenge mode.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string" },
+              "correctAnswerId": { "type": "string" },
+              "optionsIds": { "type": "array", "items": { "type": "string" } },
+              "image": { "type": "string" },
+              "text": { "type": "string" },
+              "audio": { "type": "string" }
+            }
+          }
+        },
+        "currentQuestionIndex": {
+            "type": "number",
+            "description": "The index of the current question in the challengeQuestions array."
+        },
+        "playerScores": {
+            "type": "object",
+            "description": "A map of player UIDs to their scores in the challenge mode.",
+            "additionalProperties": { "type": "number" }
+        },
+        "currentAnswers": {
+            "type": "object",
+            "description": "A map of player UIDs to their answers for the current question.",
+            "additionalProperties": {
+                "type": "object",
+                "properties": {
+                    "answerId": { "type": "string" },
+                    "isCorrect": { "type": "boolean" }
+                }
+            }
+        }
+      },
+      "required": [
+        "hostId",
+        "status",
+        "players",
+        "createdAt",
+        "gameMode"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/avatars/{avatarId}",
+        "definition": {
+          "entityName": "Avatar",
+          "schema": {
+            "$ref": "#/entities/Avatar"
+          },
+          "description": "Stores available avatars for user profiles. Publicly readable.",
+          "params": [
+            {
+              "name": "avatarId",
+              "description": "Unique identifier for the avatar."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "UserProfile",
+          "schema": {
+            "$ref": "#/entities/UserProfile"
+          },
+          "description": "Stores a single user's profile information. The document ID is the user's Firebase Auth UID. Access is restricted to the owner.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique Firebase Auth ID of the user."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/lobbies/{lobbyId}",
+        "definition": {
+          "entityName": "GameLobby",
+          "schema": {
+            "$ref": "#/entities/GameLobby"
+          },
+          "description": "Stores multiplayer game lobbies. The document ID is the game PIN.",
+          "params": [
+            {
+              "name": "lobbyId",
+              "description": "The unique PIN for the lobby."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore structure is designed to manage user profiles and avatars for the World Navigator game. It prioritizes security, scalability, and ease of debugging by adhering to the principles of Authorization Independence and Structural Segregation. Path-based ownership is used for user profiles ensuring only the user can access their data. A separate avatars collection stores the available avatars.\n\n**Authorization Independence:** Access to user profiles is directly tied to the user's `uid` via the `/users/{userId}` path. This eliminates the need for `get()` calls in security rules to validate ownership. There is no hierarchical dependency.\n\n**QAPs (Rules are not Filters):** The structure enables secure list operations because each collection (`users`, `avatars`) contains documents with homogeneous security requirements. List operations on `/avatars` are generally public (QAP-compliant since there's no filtering needed based on user identity). List operations on `/users/{userId}` will be limited to a single document based on the `userId`."
+  }
+}
