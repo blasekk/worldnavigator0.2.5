@@ -3,7 +3,7 @@
 import React, { createContext, useState, useEffect, useContext, useCallback, useMemo } from 'react';
 import { useUser as useFirebaseUser, useFirestore, useAuth as useFirebaseAuth } from '@/firebase';
 import type { User as FirebaseUser } from 'firebase/auth';
-import type { UserProfile } from '@/firebase/user';
+import type { UserProfile } from '@/lib/types';
 import { doc, onSnapshot, Unsubscribe } from 'firebase/firestore';
 import { initiateAnonymousSignIn } from '@/firebase/auth';
 import { avatars } from '@/lib/avatars';
