@@ -52,6 +52,7 @@ const SinglePlayerChallengeView: React.FC = () => {
   const { setView } = useGame();
   const {
     t,
+    language,
     question,
     score,
     gameState,
@@ -164,7 +165,7 @@ const SinglePlayerChallengeView: React.FC = () => {
             onClick={() => selectAnswer(option)}
             disabled={gameState === 'answered'}
           >
-            {option.name[t.languageCode as 'en' | 'hu']}
+            {option.name[language]}
           </Button>
         ))}
       </div>
@@ -175,7 +176,7 @@ const SinglePlayerChallengeView: React.FC = () => {
 
 const MultiplayerChallengeView: React.FC = () => {
     const { user } = useAuth();
-    const { lobby, handleChallengeAnswer, setView, isRoundReveal, t } = useGame();
+    const { lobby, handleChallengeAnswer, setView, isRoundReveal, t, language } = useGame();
     const audioRef = useRef<HTMLAudioElement | null>(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const [timer, setTimer] = useState(15);
@@ -325,7 +326,7 @@ const MultiplayerChallengeView: React.FC = () => {
                         onClick={() => handleChallengeAnswer(option.id)}
                         disabled={!!myAnswer || isRoundReveal}
                     >
-                        {option.name[t.languageCode as 'en' | 'hu']}
+                        {option.name[language]}
                         {getOpponentIndicator(option)}
                     </Button>
                 ))}
@@ -340,12 +341,14 @@ const MultiplayerChallengeView: React.FC = () => {
                         <CardContent className="space-y-4">
                             <div className="flex items-center justify-center gap-2">
                                 {myAnswer?.isCorrect ? <Check className="text-green-500"/> : <X className="text-destructive"/>}
-                                <p>{t.you}: {countries.find(c => c.id === myAnswer?.answerId)?.name[t.languageCode as 'en' | 'hu'] || t.notAnswered}</p>
+                                <p>{t.you}: {countries.find(c => c.id === myAnswer?.answerId)?.name[language] || t.notAnswered}</p>
                             </div>
-                            <div className="flex items-center justify-center gap-2">
-                                {opponentAnswer?.isCorrect ? <Check className="text-green-500"/> : <X className="text-destructive"/>}
-                                <p>{opponent?.username || 'Opponent'}: {countries.find(c => c.id === opponentAnswer?.answerId)?.name[t.languageCode as 'en' | 'hu'] || t.notAnswered}</p>
-                            </div>
+                            {opponent && opponentAnswer && (
+                              <div className="flex items-center justify-center gap-2">
+                                  {opponentAnswer?.isCorrect ? <Check className="text-green-500"/> : <X className="text-destructive"/>}
+                                  <p>{opponent?.username || 'Opponent'}: {countries.find(c => c.id === opponentAnswer?.answerId)?.name[language] || t.notAnswered}</p>
+                              </div>
+                            )}
                         </CardContent>
                     </Card>
                 </div>
