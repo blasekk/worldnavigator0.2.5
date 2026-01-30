@@ -14,6 +14,7 @@ const LOCAL_HIGH_SCORE_KEY = 'world_challenge_highscore';
 
 interface ChallengeContextType {
   t: (typeof translations)[Language];
+  language: Language;
   question: Question | null;
   score: number;
   highScore: number;
@@ -28,7 +29,7 @@ const ChallengeContext = createContext<ChallengeContextType | undefined>(undefin
 export const ChallengeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { language, challengeQuestionTypes } = useGame();
   const { user, profile } = useAuth();
-  const t = useMemo(() => ({...translations[language], languageCode: language}), [language]);
+  const t = useMemo(() => translations[language], [language]);
 
   const [question, setQuestion] = useState<Question | null>(null);
   const [score, setScore] = useState(0);
@@ -114,6 +115,7 @@ export const ChallengeProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   const value = {
     t,
+    language,
     question,
     score,
     highScore,
