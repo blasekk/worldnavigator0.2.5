@@ -4,7 +4,6 @@ import {
   setDoc,
   collection,
   getDoc,
-  Timestamp,
   Firestore,
   runTransaction,
   arrayUnion,
@@ -12,55 +11,11 @@ import {
   updateDoc,
 } from 'firebase/firestore';
 import type { User } from 'firebase/auth';
-import type { UserProfile } from './user';
+import type { UserProfile, GameLobby, LobbyPlayer, LobbyGuess, SerializableQuestion } from '@/lib/types';
 import { countries } from '@/lib/countries';
-import { getRandomCountry, evaluateGuess, GuessResult } from '@/lib/game-logic';
+import { getRandomCountry, evaluateGuess } from '@/lib/game-logic';
 import type { Language } from '@/lib/translations';
 import { generateQuestion, type QuestionType } from '@/lib/challenge-logic';
-
-export interface LobbyPlayer {
-  uid: string;
-  username: string;
-  avatarUrl: string;
-}
-
-export interface LobbyGuess extends Omit<GuessResult, 'guessedCountry'> {
-    playerId: string;
-    guessedCountryId: string;
-    guessedCountryName: string;
-}
-
-export interface SerializableQuestion {
-    type: QuestionType;
-    correctAnswerId: string;
-    optionsIds: string[];
-    image?: string;
-    text?: string;
-    audio?: string;
-}
-
-export interface GameLobby {
-  id: string; // The PIN
-  hostId: string;
-  status: 'waiting' | 'playing' | 'finished';
-  players: LobbyPlayer[];
-  gameMode: 'classic' | 'challenge';
-  createdAt: Timestamp;
-
-  // Classic mode
-  targetCountryId?: string;
-  currentPlayerUid?: string;
-  guesses?: LobbyGuess[];
-
-  // Challenge mode
-  challengeQuestionTypes?: QuestionType[];
-  challengeQuestions?: SerializableQuestion[];
-  currentQuestionIndex?: number;
-  playerScores?: { [uid: string]: number };
-  currentAnswers?: { [uid: string]: { answerId: string, isCorrect: boolean } };
-
-  winnerUid?: string;
-}
 
 
 // Function to generate a unique 6-digit PIN
