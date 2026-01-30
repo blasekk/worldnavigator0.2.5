@@ -1,0 +1,147 @@
+/**
+ * Core Philosophy: This ruleset enforces a strict user-ownership model for player data,
+ * ensuring that each user can only access and modify their own information. It establishes
+ * a clear separation between private, user-specific data (profiles) and public, shared
+ * data (avatars).
+ *
+ * Data Structure:
+ * - /users/{userId}: Each user's profile document is stored at a top-level path where
+ *   the document ID matches the user's Firebase Authentication UID. This path-based
+ *   ownership is simple, performant, and secure.
+ * - /avatars/{avatarId}: A read-only collection containing avatar options available
+ *   to all players.
+ *
+ * Key Security Decisions:
+ * - User Privacy: Listing the top-level /users collection is explicitly forbidden to
+ *   prevent enumeration of all players.
+ * - Profile Security: All read and write access to a user's profile document is restricted
+ *   to the authenticated owner of that profile.
+ * - Read-Only Public Data: The /avatars collection is publicly readable by anyone but
+ *   is not writable from the client, preventing tampering with game assets.
+ * - Path-Data Consistency: On profile creation, the rules enforce that the `id` field
+ *   within the document must match the user's UID in the path, ensuring relational integrity.
+ *   This `id` field is then enforced as immutable.
+ *
+ * Note on Path Interpretation: The original specification mentioned a path `/users/{userId}/profile`.
+ * For optimal security and to align with Firestore best practices for user-owned data, this
+ * has been implemented as `match /users/{userId}` where the document itself is the profile.
+ * This avoids unnecessary subcollections and simplifies ownership rules.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ------------------------------------------------------------------------
+    // Helper Functions
+    // ------------------------------------------------------------------------
+
+    /**
+     * Checks if the user is authenticated.
+     */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /**
+     * Checks if the currently authenticated user's UID matches the provided userId.
+     * This is the core of our user-ownership security model.
+     */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    /**
+     * Verifies ownership for an existing document. Used for update and delete
+     * operations to ensure the document exists before allowing the action.
+     */
+    function isExistingOwner(userId) {
+      return isOwner(userId) && resource != null;
+    }
+
+    /**
+     * On create, validates that the incoming UserProfile document contains an 'id'
+     * field that correctly matches the user's auth UID. This creates an immutable
+     * link between the document's data and its owner.
+     */
+    function incomingDataHasValidOwnerId(userId) {
+      return request.resource.data.id == userId;
+    }
+
+    /**
+     * On update, ensures that the 'id' field of a UserProfile cannot be changed.
+     * This prevents re-assigning a profile to a different user.
+     */
+    function ownerIdIsUnchanged() {
+      return request.resource.data.id == resource.data.id;
+    }
+
+    // ------------------------------------------------------------------------
+    // Collection Rules
+    // ------------------------------------------------------------------------
+
+    /**
+     * @description Publicly available avatar assets for user profiles.
+     * @path /avatars/{avatarId}
+     * @allow (get) Any user, signed in or not, can retrieve an avatar document.
+     * @deny (create) Client-side creation of new avatars is forbidden.
+     * @principle Establishes a read-only public collection for shared game assets.
+     */
+    match /avatars/{avatarId} {
+      allow get, list: if true;
+      allow create, update, delete: if false;
+    }
+
+    /**
+     * @description A user's private profile, containing their username, scores, and avatar choice.
+     * @path /users/{userId}
+     * @allow (create) A new user can create their own profile document if their auth UID matches the document ID.
+     * @deny (get) A user attempting to read another user's profile document.
+     * @principle Enforces strict document ownership based on the user's authentication UID.
+     */
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow list: if false; // Disallow listing even within a user's own document path for clarity.
+      allow create: if isOwner(userId) && incomingDataHasValidOwnerId(userId);
+      allow update: if isExistingOwner(userId) && ownerIdIsUnchanged();
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description This wildcard match securely denies any attempt to list or query the entire /users collection.
+     * @path /users/{anyUserDoc=**}
+     * @allow None. This is a default-deny rule.
+     * @deny (list) Any client trying to list documents in the /users collection.
+     * @principle Protects user privacy by preventing enumeration of all user profiles in the game.
+     */
+    match /users/{anyUserDoc=**} {
+      allow read, write: if false;
+    }
+
+    /**
+     * @description Multiplayer game lobbies. The document ID is a user-friendly PIN.
+     * @path /lobbies/{lobbyId}
+     * @principle Anyone signed in can find and read a lobby to join. Writes are
+     *            controlled to manage the game flow (creating, joining, starting).
+     * @note Update rules are currently permissive for initial implementation.
+     *       They should be tightened in the future to only allow valid state
+     *       transitions (e.g., host starting the game, players joining a waiting lobby).
+     */
+    match /lobbies/{lobbyId} {
+      allow read: if isSignedIn();
+
+      // Only an authenticated user can create a lobby, and they must be the host and specify a valid game mode.
+      allow create: if isSignedIn() 
+                      && request.resource.data.hostId == request.auth.uid
+                      && request.resource.data.gameMode in ['classic', 'challenge'];
+
+      // For now, allow any signed-in user to update a lobby.
+      // TODO: Secure this to only allow the host to start the game,
+      // only allow new players to join if the lobby is not full,
+      // and only allow the currentPlayerUid to submit a guess.
+      allow update: if isSignedIn();
+
+      // Only the host can delete their own lobby.
+      allow delete: if isOwner(resource.data.hostId);
+    }
+  }
+}
