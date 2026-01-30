@@ -1,0 +1,52 @@
+{
+  "placeholderImages": [
+    {
+      "seed": "avatar1",
+      "width": 128,
+      "height": 128,
+      "hint": "explorer"
+    },
+    {
+      "seed": "avatar2",
+      "width": 128,
+      "height": 128,
+      "hint": "pilot"
+    },
+    {
+      "seed": "avatar3",
+      "width": 128,
+      "height": 128,
+      "hint": "captain"
+    },
+    {
+      "seed": "avatar4",
+      "width": 128,
+      "height": 128,
+      "hint": "adventurer"
+    },
+    {
+      "seed": "avatar5",
+      "width": 128,
+      "height": 128,
+      "hint": "navigator"
+    },
+    {
+      "seed": "avatar6",
+      "width": 128,
+      "height": 128,
+      "hint": "cartoon"
+    },
+    {
+      "seed": "avatar7",
+      "width": 128,
+      "height": 128,
+      "hint": "anime"
+    },
+    {
+      "seed": "avatar8",
+      "width": 128,
+      "height": 128,
+      "hint": "pixel"
+    }
+  ]
+}
