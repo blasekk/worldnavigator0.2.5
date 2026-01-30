@@ -11,7 +11,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { ArrowLeft, ArrowRight, Loader2 } from 'lucide-react';
 import { useAuth } from '@/contexts/auth-context';
 import type { GuessResult } from '@/lib/game-logic';
-import type { LobbyGuess } from '@/firebase/multiplayer';
+import type { LobbyGuess } from '@/lib/types';
 
 export function GameScreen() {
   const { 
