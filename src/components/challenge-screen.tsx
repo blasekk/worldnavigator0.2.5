@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { ArrowLeft, Play, Pause, RotateCw, Trophy, Check, X, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { countries, type Country } from '@/lib/countries';
-import type { SerializableQuestion } from '@/firebase/multiplayer';
+import type { SerializableQuestion } from '@/lib/types';
 import { useAuth } from '@/contexts/auth-context';
 import { Progress } from '@/components/ui/progress';
 
@@ -220,7 +220,7 @@ const MultiplayerChallengeView: React.FC = () => {
     }
 
     const { type, optionsIds, correctAnswerId, image, text, audio } = question;
-    const options: Country[] = optionsIds.map(id => countries.find(c => c.id === id)).filter((c): c is Country => !!c);
+    const options: Country[] = (optionsIds || []).map(id => countries.find(c => c.id === id)).filter((c): c is Country => !!c);
     const myAnswer = user ? lobby.currentAnswers?.[user.uid] : undefined;
     
     const opponent = lobby.players.find(p => p.uid !== user?.uid);
@@ -344,7 +344,7 @@ const MultiplayerChallengeView: React.FC = () => {
                             </div>
                             <div className="flex items-center justify-center gap-2">
                                 {opponentAnswer?.isCorrect ? <Check className="text-green-500"/> : <X className="text-destructive"/>}
-                                <p>{opponent?.username}: {countries.find(c => c.id === opponentAnswer?.answerId)?.name[t.languageCode as 'en' | 'hu'] || t.notAnswered}</p>
+                                <p>{opponent?.username || 'Opponent'}: {countries.find(c => c.id === opponentAnswer?.answerId)?.name[t.languageCode as 'en' | 'hu'] || t.notAnswered}</p>
                             </div>
                         </CardContent>
                     </Card>
