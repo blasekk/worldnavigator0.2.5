@@ -10,8 +10,9 @@ import type { QuestionType } from '@/lib/challenge-logic';
 import { useAuth } from './auth-context';
 import { updateUserProfile } from '@/firebase/user';
 import { useFirestore, useDoc } from '@/firebase';
-import { createLobby, joinLobby, startGameInLobby, submitLobbyGuess, GameLobby, updateLobbyChallengeTypes, submitChallengeAnswer, advanceChallengeRound } from '@/firebase/multiplayer';
+import { createLobby, joinLobby, startGameInLobby, submitLobbyGuess, updateLobbyChallengeTypes, submitChallengeAnswer, advanceChallengeRound } from '@/firebase/multiplayer';
 import { useMemoFirebase } from '@/firebase/provider';
+import type { GameLobby } from '@/lib/types';
 
 
 type View = 'menu' | 'settings' | 'game' | 'challenge' | 'singleplayer_menu' | 'multiplayer_menu' | 'multiplayer_classic_menu' | 'multiplayer_challenge_menu' | 'lobby' | 'profile';
