@@ -229,16 +229,16 @@ const MultiplayerChallengeView: React.FC = () => {
     const getButtonClass = (option: Country) => {
         if (!isRoundReveal) return '';
         if (option.id === correctAnswerId) return 'bg-green-500 hover:bg-green-600 border-transparent text-primary-foreground';
-        if (option.id === myAnswer?.answerId && !myAnswer.isCorrect) return 'bg-destructive hover:bg-destructive/90 border-transparent text-destructive-foreground';
+        if (myAnswer && option.id === myAnswer.answerId && !myAnswer.isCorrect) return 'bg-destructive hover:bg-destructive/90 border-transparent text-destructive-foreground';
         return 'opacity-50';
     };
     
     const getOpponentIndicator = (option: Country) => {
-        if (!isRoundReveal || !opponentAnswer || opponentAnswer.answerId !== option.id) return null;
+        if (!isRoundReveal || !opponentAnswer || opponentAnswer.answerId !== option.id || !opponent) return null;
         return (
             <div className="absolute top-1 right-1 flex items-center gap-1 text-xs bg-muted text-muted-foreground px-1.5 py-0.5 rounded-full">
                 <User className="h-3 w-3" />
-                {opponent?.username.split(' ')[0]}
+                {opponent.username.split(' ')[0]}
             </div>
         );
     };
@@ -365,5 +365,3 @@ export const ChallengeScreen: React.FC = () => {
         </ChallengeProvider>
     )
 }
-
-    
