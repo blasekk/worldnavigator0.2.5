@@ -220,7 +220,7 @@ const MultiplayerChallengeView: React.FC = () => {
     }
 
     const { type, optionsIds, correctAnswerId, image, text, audio } = question;
-    const options: Country[] = optionsIds.map(id => countries.find(c => c.id === id)!).filter(Boolean);
+    const options: Country[] = optionsIds.map(id => countries.find(c => c.id === id)).filter((c): c is Country => !!c);
     const myAnswer = user ? lobby.currentAnswers?.[user.uid] : undefined;
     
     const opponent = lobby.players.find(p => p.uid !== user?.uid);
@@ -365,3 +365,5 @@ export const ChallengeScreen: React.FC = () => {
         </ChallengeProvider>
     )
 }
+
+    
